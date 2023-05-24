@@ -23,29 +23,29 @@ $index = $clipboardContent.IndexOf("<html")
 
 # Check if the "<html>" tag is found
 if ($index -ge 0) {
-    # Remove the unwanted text before "<html>"
-    $cleanedContent = $clipboardContent.Substring($index)
 
-    # Find the index of the first occurrence of "<html>"
-    $index = $clipboardContent.IndexOf("</body>")
+       # Define the regular expression pattern
+    $pattern = '(?ms)(?<=<!--StartFragment-->).*?(?=<!--EndFragment-->)'
 
-    # Check if the "<html>" tag is found
-    if ($index -ge 0) {
+    # Extract the content between the HTML comments
+    $content = [regex]::Match($clipboardContent, $pattern).Value
 
-        # Remove the unwanted text before "<html>"
-        $toReplace = $clipboardContent.Substring($index + 1)
+    # Output the extracted content
+    $content
 
+    # Get the current working directory
+    $currentDirectory = Split-Path -Parent $MyInvocation.MyCommand.Path
 
-        # Remove the closing </html> tag
-        $cleanedContent = $cleanedContent -replace "toReplace", ""
-    }
+    # Specify the relative paths to the files
+    $prefixPath = Join-Path -Path $currentDirectory -ChildPath "prefix.html"
+    $suffixPath = Join-Path -Path $currentDirectory -ChildPath "suffix.html"
 
-    # Read the content of the prefix.html and suffix.html files
-    $prefix = Get-Content -Path ".\prefix.html" -Encoding UTF8
-    $suffix = Get-Content -Path "C:\Users\hadis\Documents\GitHub\Helpdesk\suffix.html" -Encoding UTF8
+    # Read the file contents using relative paths
+    $prefix = Get-Content -Path $prefixPath -Encoding UTF8
+    $suffix = Get-Content -Path $suffixPath -Encoding UTF8
 
     # Combine the prefix, cleaned content, and suffix
-    $modifiedText = $prefix + $cleanedContent + $suffix
+    $modifiedText = $prefix + $content + $suffix
 
     # Set the modified text back to the clipboard as HTML format
     Set-ClipboardData $modifiedText $modifiedText
